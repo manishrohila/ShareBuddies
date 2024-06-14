@@ -3,17 +3,30 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from 'react';
 import { signIn, signOut, useSession, getProviders } from 'next-auth/react';
+import { data } from "autoprefixer";
 
 
 
 const Nav = () => {
 
   const { data: session } = useSession();
- // console.log("data", session);
-
+  // console.log("data", session);
   const [providers, setProviders] = useState(null);
   const [toggleDropdown, settoggleDropdown] = useState(false);
 
+  const getInitialsAvatarUrl = (name = "unknown") => {
+    const initials = name;
+    const color = Math.floor(Math.random() * 16777215).toString(16); // Generate random color
+    return `https://ui-avatars.com/api/?name=${initials}&color=${color}&background=random`;
+  };
+
+  const [profileImageSrc, setProfileImageSrc] = useState(data.image || getInitialsAvatarUrl(data.name));
+
+  useEffect(() => {
+    if (!data.image) {
+      setProfileImageSrc(getInitialsAvatarUrl(data.name));
+    }
+  }, []);
   useEffect(() => {
     const setUpProviders = async () => {
       const response = await getProviders();
