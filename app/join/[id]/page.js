@@ -31,68 +31,75 @@ const JoinRide = ({ params }) => {
 
 
   const handleJoin = async (e) => {
-
     e.preventDefault();
     setsubmitting(true);
+    
+    // Show toast notification when joining starts
+    toast("Joining...", { hideProgressBar: true, autoClose: 2000, type: 'info' });
 
     if (session?.user.id === ride.user._id) {
       toast("Khud ki kese le skta hai??", { hideProgressBar: true, autoClose: 2000, type: 'error' });
       router.push('/');
+      return; // Add return statement to exit function
     }
-    if (!rideId) return alert('RIDE id not found')
-    if (session?.user.id !== ride.user._id)
+
+    if (!rideId) {
+      alert('RIDE id not found');
+      return; // Add return statement to exit function
+    }
+
+    if (session?.user.id !== ride.user._id) {
       try {
         const response = await fetch(`/api/ride/${rideId}`,
           {
             method: 'PATCH',
             body: JSON.stringify({
-
               newParticipant: {
                 contact: participant.contact,
                 userId: session?.user.id,
                 fullname: participant.fullname,
                 enrollmentno: participant.enrollmentno,
-
               }
             })
           }
-        )
-        console.log(response);
+        );
+
+        console.log("printing response ",response);
+
         if (response.ok) {
-          toast("joined successfully", { hideProgressBar: true, autoClose: 2000, type: 'success' })
-          router.push('/');
-        }
-        if (response.status === 409) {
-          toast("You have already joined with this Id", { hideProgressBar: true, autoClose: 2000, type: 'error' })
+          toast("Joined successfully", { hideProgressBar: true, autoClose: 2000, type: 'success' });
+          router.push('/profile'); // Navigate to profile page
+        } else if (response.status === 409) {
+          toast("You have already joined with this Id", { hideProgressBar: true, autoClose: 2000, type: 'error' });
           router.push('/');
         }
       } catch (error) {
-        console.log(error)
+        console.log(error);
+        console.log("Printing error", error.message);
       } finally {
         setsubmitting(false);
       }
-
-
+    }
   }
 
   useEffect(() => {
     if (!session) {
-      toast("Login first", { hideProgressBar: true, autoClose: 2000, type: 'error' })
+      toast("Login first", { hideProgressBar: true, autoClose: 2000, type: 'error' });
       router.push('/');
     }
+
     const getRideDetails = async () => {
       const response = await fetch(`/api/ride/${rideId}`);
-
       const data = await response.json();
-      // console.log(data);
+
       setride({
         contact: data.contact,
         user: data.creator
-      })
+      });
     }
 
     if (rideId) getRideDetails();
-  }, [rideId])
+  }, [rideId]);
 
   return (
     <section className='sm:w-full max-w-full sm:ml-20 ml-10 flex-start flex-col'>
@@ -105,7 +112,7 @@ const JoinRide = ({ params }) => {
         className='mt-10 w-full max-w-2xl my-4 flex flex-col gap-7 glassmorphism'
       >
 
-        <label className='pl-4' >
+        <label className='pl-4'>
           <span className="font-satoshi font-semibold text-base text-gray-700">Full Name</span>
           <input type="text"
             value={participant.fullname}
@@ -115,7 +122,7 @@ const JoinRide = ({ params }) => {
             className='form_input' />
         </label>
 
-        <label className='pl-4' >
+        <label className='pl-4'>
           <span className="font-satoshi font-semibold text-base text-gray-700">Enrollment No.</span>
           <input type="text"
             value={participant.enrollmentno}
@@ -124,10 +131,8 @@ const JoinRide = ({ params }) => {
             required
             className='form_input' />
         </label>
-        <label className='w-full ml-4' >
+        <label className='w-full ml-4'>
           <span className="font-satoshi font-semibold text-base text-gray-700">Contact Number </span>
-
-
           <span>+91</span>
           <input type="tel"
             value={participant.contact}
@@ -136,7 +141,6 @@ const JoinRide = ({ params }) => {
             placeholder="012-345-6789"
             className='tele_input form_input'
           />
-
         </label>
 
         <div className='flex-end mx-3 mb-5 gap-4'>
@@ -146,8 +150,7 @@ const JoinRide = ({ params }) => {
           <button
             type='submit'
             disabled={submitting}
-            className='px-5 py-1.5 text-sm  black_btn '
-
+            className='px-5 py-1.5 text-sm black_btn'
           >
             {submitting ? "Joining..." : "Join"}
           </button>
@@ -157,4 +160,4 @@ const JoinRide = ({ params }) => {
   )
 }
 
-export default JoinRide
+export default JoinRide;
